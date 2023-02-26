@@ -1,0 +1,1 @@
+target_sources(path_linalg PRIVATE naive_minplus.cu host_minplus.cc)
