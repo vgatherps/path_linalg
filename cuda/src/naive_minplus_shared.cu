@@ -73,28 +73,28 @@ __global__ static void naive_minplus_shared_cu(int M, int N, int K,
     A_prime_shared[0][thread_x * BLOCK_SIZE + thread_y] = A_prime[thread_x * K + thread_y];
     B_cost_shared[0][thread_x * BLOCK_SIZE + thread_y] = B_cost[thread_x * N + thread_y];
     B_prime_shared[0][thread_x * BLOCK_SIZE + thread_y] = B_prime[thread_x * N + thread_y];
-    __syncthreads();
 
     for (int whichBlock = 0; whichBlock < K; whichBlock += BLOCK_SIZE)
     {
         int read_block = write_block;
         write_block = 1 - write_block;
 
-        A_cost += BLOCK_SIZE;
-        A_prime += BLOCK_SIZE;
-        B_cost += BLOCK_SIZE * N;
-        B_prime += BLOCK_SIZE * N;
+        __syncthreads(); // block to ensure everyone has read into write_block and finished reading from read_block
+        if (whichBlock + BLOCK_SIZE < K)
+        {
+            A_cost += BLOCK_SIZE;
+            A_prime += BLOCK_SIZE;
+            B_cost += BLOCK_SIZE * N;
+            B_prime += BLOCK_SIZE * N;
 
-        // each thread loads a single element into shared memory
-        A_cost_shared[write_block][thread_x * BLOCK_SIZE + thread_y] = A_cost[thread_x * K + thread_y];
-        A_prime_shared[write_block][thread_x * BLOCK_SIZE + thread_y] = A_prime[thread_x * K + thread_y];
-        B_cost_shared[write_block][thread_x * BLOCK_SIZE + thread_y] = B_cost[thread_x * N + thread_y];
-        B_prime_shared[write_block][thread_x * BLOCK_SIZE + thread_y] = B_prime[thread_x * N + thread_y];
-
+            // each thread loads a single element into shared memory
+            A_cost_shared[write_block][thread_x * BLOCK_SIZE + thread_y] = A_cost[thread_x * K + thread_y];
+            A_prime_shared[write_block][thread_x * BLOCK_SIZE + thread_y] = A_prime[thread_x * K + thread_y];
+            B_cost_shared[write_block][thread_x * BLOCK_SIZE + thread_y] = B_cost[thread_x * N + thread_y];
+            B_prime_shared[write_block][thread_x * BLOCK_SIZE + thread_y] = B_prime[thread_x * N + thread_y];
+        }
         // do min-plus on the block
         naive_inner_loop<true>(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, thread_x, thread_y, 0, BLOCK_SIZE, A_cost_shared[read_block], B_cost_shared[read_block], min_cost, A_prime_shared[read_block], B_prime_shared[read_block], min_prime);
-
-        __syncthreads(); // block to ensure everyone has read into write_block and finished reading from read_block
     }
     C_cost[thread_x * N + thread_y] = min_cost;
     C_prime[thread_x * N + thread_y] = min_prime;

@@ -7,8 +7,6 @@
 #include "naive_minplus_shared.cuh"
 #include "types.hh"
 
-#include <cuda_runtime.h>
-
 #include <cstdlib>
 
 typedef void (*KernelFn)(int M, int N, int K, const float *A_cost,
@@ -35,6 +33,7 @@ constexpr static Kernel kernels[] = {
         "naive_minplus_contiguous",
         naive_minplus_contiguous,
     },
-    {"naive_minplus_shared", naive_minplus_shared}};
+    {"naive_minplus_shared", naive_minplus_shared},
+    {"naive_minplus_indexing_shared", naive_minplus_indexing_shared}};
 
 constexpr static std::size_t num_kernels = sizeof(kernels) / sizeof(Kernel);

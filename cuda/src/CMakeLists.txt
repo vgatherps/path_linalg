@@ -7,4 +7,5 @@ target_sources(
     naive_minplus_branch.cu
     naive_minplus_contiguous.cu
     naive_minplus_shared.cu
+    naive_minplus_indexing_shared.cu
 )

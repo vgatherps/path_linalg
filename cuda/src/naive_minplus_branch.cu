@@ -32,13 +32,13 @@ __global__ static void naive_minplus_branch_cu(int M, int N, int K,
 
     if (x < M && y < N)
     {
-        float min_cost = A_cost[x * K] + B_cost[y];
-        uint min_prime = A_prime[x * K] * B_prime[y];
+        float min_cost = ROW_IDX(A_cost, M, K, x, 0) + ROW_IDX(B_cost, K, M, 0, y);
+        uint min_prime = ROW_IDX(A_prime, M, K, x, 0) * ROW_IDX(B_prime, K, M, 0, y);
         int min_k_branchless = K < NUM_ROWS_BRANCHLESS ? K : NUM_ROWS_BRANCHLESS;
         naive_inner_loop<true>(M, N, K, x, y, 1, min_k_branchless, A_cost, B_cost, min_cost, A_prime, B_prime, min_prime);
         naive_inner_loop<false>(M, N, K, x, y, min_k_branchless, K, A_cost, B_cost, min_cost, A_prime, B_prime, min_prime);
-        C_cost[x * N + y] = min_cost;
-        C_prime[x * N + y] = min_prime;
+        ROW_IDX(C_cost, M, N, x, y) = min_cost;
+        ROW_IDX(C_prime, M, N, x, y) = min_prime;
     }
 }
 
