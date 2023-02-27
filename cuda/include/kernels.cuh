@@ -4,6 +4,7 @@
 #include "naive_minplus.cuh"
 #include "naive_minplus_branch.cuh"
 #include "naive_minplus_contiguous.cuh"
+#include "naive_minplus_shared.cuh"
 #include "types.hh"
 
 #include <cuda_runtime.h>
@@ -20,18 +21,20 @@ struct Kernel {
   KernelFn fnc;
 };
 
-constexpr static Kernel kernels[] = {{"host", host_minplus},
-                                     {
-                                         "naive_minplus",
-                                         naive_minplus,
-                                     },
-                                     {
-                                         "naive_minplus_branch",
-                                         naive_minplus_branch,
-                                     },
-                                     {
-                                         "naive_minplus_contiguous",
-                                         naive_minplus_contiguous,
-                                     }};
+constexpr static Kernel kernels[] = {
+    {"host", host_minplus},
+    {
+        "naive_minplus",
+        naive_minplus,
+    },
+    {
+        "naive_minplus_branch",
+        naive_minplus_branch,
+    },
+    {
+        "naive_minplus_contiguous",
+        naive_minplus_contiguous,
+    },
+    {"naive_minplus_shared", naive_minplus_shared}};
 
 constexpr static std::size_t num_kernels = sizeof(kernels) / sizeof(Kernel);

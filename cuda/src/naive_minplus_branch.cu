@@ -25,8 +25,6 @@ __global__ static void naive_minplus_branch_cu(int M, int N, int K,
     const uint x = blockIdx.x * blockDim.x + threadIdx.x;
     const uint y = blockIdx.y * blockDim.y + threadIdx.y;
 
-    printf("x: %d, y: %d", x, y);
-
     if (K <= 0)
     {
         return;
