@@ -11,7 +11,9 @@
 #include <iostream>
 #include <vector>
 
-constexpr bool VERIFY = false;
+#ifndef ALWAYS_VERIFY
+#define ALWAYS_VERIFY false
+#endif
 
 #define cudaCheck(err) (cudaCheck(err, __FILE__, __LINE__))
 
@@ -140,7 +142,7 @@ int main(int argc, char **argv) {
       cudaCheck(cudaDeviceSynchronize());
       cudaMemcpy(C_cost, dC_cost, local_matrix_size, cudaMemcpyDeviceToHost);
       cudaMemcpy(C_prime, dC_prime, local_matrix_size, cudaMemcpyDeviceToHost);
-      if (VERIFY) {
+      if (ALWAYS_VERIFY || size < 512) {
 
         host_minplus(m, n, k, A_cost, B_cost, C_host_cost, A_prime, B_prime,
                      C_host_prime);
