@@ -3,6 +3,7 @@
 #include "host_minplus.hh"
 #include "naive_minplus.cuh"
 #include "naive_minplus_branch.cuh"
+#include "naive_minplus_contiguous.cuh"
 #include "types.hh"
 
 #include <cuda_runtime.h>
@@ -27,6 +28,10 @@ constexpr static Kernel kernels[] = {{"host", host_minplus},
                                      {
                                          "naive_minplus_branch",
                                          naive_minplus_branch,
+                                     },
+                                     {
+                                         "naive_minplus_contiguous",
+                                         naive_minplus_contiguous,
                                      }};
 
 constexpr static std::size_t num_kernels = sizeof(kernels) / sizeof(Kernel);

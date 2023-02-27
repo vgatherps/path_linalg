@@ -1,5 +1,7 @@
 #include "types.hh"
 
+#include "naive_minplus_inner_loop.cuh"
+
 #include <cstdio>
 #include <cstdlib>
 #include <cuda_runtime.h>
@@ -27,19 +29,9 @@ __global__ static void naive_minplus_cu(int M, int N, int K,
     {
         float min_cost = A_cost[x * K] + B_cost[y];
         uint min_prime = A_prime[x * K] * B_prime[y];
-        for (int i = 1; i < K; ++i)
-        {
 
-            float i_cost = A_cost[x * K + i] + B_cost[i * N + y];
-            uint i_prime = A_prime[x * K + i] * B_prime[i * N + y];
+        naive_inner_loop<true>(M, N, K, x, y, 1, K, A_cost, B_cost, min_cost, A_prime, B_prime, min_prime);
 
-            // This is converted into predicates by the compiler
-            if (i_cost < min_cost)
-            {
-                min_cost = i_cost;
-                min_prime = i_prime;
-            }
-        }
         C_cost[x * N + y] = min_cost;
         C_prime[x * N + y] = min_prime;
     }

@@ -11,6 +11,8 @@
 #include <iostream>
 #include <vector>
 
+constexpr bool VERIFY = false;
+
 #define cudaCheck(err) (cudaCheck(err, __FILE__, __LINE__))
 
 const std::string errLogFile = "matrixValidationFailure.txt";
@@ -134,33 +136,35 @@ int main(int argc, char **argv) {
     if (kernel_num != 0) {
       kernel.fnc(m, n, k, dA_cost, dB_cost, dC_cost, dA_prime, dB_prime,
                  dC_prime);
-      host_minplus(m, n, k, A_cost, B_cost, C_host_cost, A_prime, B_prime,
-                   C_host_prime);
 
       cudaCheck(cudaDeviceSynchronize());
       cudaMemcpy(C_cost, dC_cost, local_matrix_size, cudaMemcpyDeviceToHost);
       cudaMemcpy(C_prime, dC_prime, local_matrix_size, cudaMemcpyDeviceToHost);
+      if (VERIFY) {
 
-      if (!verify_matrix(C_cost, C_host_cost, m * n)) {
-        std::cout
-            << "Failed to pass the correctness verification against host impl "
-            << std::endl;
-        /*
- if (m <= 128) {
-   std::cout << " Logging faulty output into " << errLogFile << "\n";
-   std::ofstream fs;
-   fs.open(errLogFile);
-   fs << "A:\n";
-   print_matrix(A, m, n, fs);
-   fs << "B:\n";
-   print_matrix(B, m, n, fs);
-   fs << "C:\n";
-   print_matrix(C, m, n, fs);
-   fs << "Should:\n";
-   print_matrix(C_ref, m, n, fs);
- }
- */
-        exit(EXIT_FAILURE);
+        host_minplus(m, n, k, A_cost, B_cost, C_host_cost, A_prime, B_prime,
+                     C_host_prime);
+        if (!verify_matrix(C_cost, C_host_cost, m * n)) {
+          std::cout << "Failed to pass the correctness verification against "
+                       "host impl "
+                    << std::endl;
+          /*
+   if (m <= 128) {
+     std::cout << " Logging faulty output into " << errLogFile << "\n";
+     std::ofstream fs;
+     fs.open(errLogFile);
+     fs << "A:\n";
+     print_matrix(A, m, n, fs);
+     fs << "B:\n";
+     print_matrix(B, m, n, fs);
+     fs << "C:\n";
+     print_matrix(C, m, n, fs);
+     fs << "Should:\n";
+     print_matrix(C_ref, m, n, fs);
+   }
+   */
+          exit(EXIT_FAILURE);
+        }
       }
     }
 

@@ -1,5 +1,7 @@
 #include "types.hh"
 
+#include "naive_minplus_inner_loop.cuh"
+
 #include <cstdio>
 #include <cstdlib>
 #include <cuda_runtime.h>
@@ -32,39 +34,9 @@ __global__ static void naive_minplus_branch_cu(int M, int N, int K,
     {
         float min_cost = A_cost[x * K] + B_cost[y];
         uint min_prime = A_prime[x * K] * B_prime[y];
-        int i = 1;
         int min_k_branchless = K < NUM_ROWS_BRANCHLESS ? K : NUM_ROWS_BRANCHLESS;
-        for (; i < min_k_branchless; ++i)
-        {
-
-            float i_cost = A_cost[x * K + i] + B_cost[i * N + y];
-            uint i_prime = A_prime[x * K + i] * B_prime[i * N + y];
-
-            // This is converted into predicates by the compiler
-            if (i_cost < min_cost)
-            {
-                min_cost = i_cost;
-                min_prime = i_prime;
-            }
-        }
-        for (; i < K; ++i)
-        {
-
-            // This is structured to force a branch
-            // assumption is that after some traversal we'll have found a minimum
-            // and we avoid memory bandwidth of the primes matrix
-
-            float i_cost = A_cost[x * K + i] + B_cost[i * N + y];
-
-            if (i_cost < min_cost)
-            {
-                // As this load is inside the branch, the compiler
-                // does not hoist it into a predicate
-                uint i_prime = A_prime[x * K + i] * B_prime[i * N + y];
-                min_cost = i_cost;
-                min_prime = i_prime;
-            }
-        }
+        naive_inner_loop<true>(M, N, K, x, y, 1, min_k_branchless, A_cost, B_cost, min_cost, A_prime, B_prime, min_prime);
+        naive_inner_loop<false>(M, N, K, x, y, min_k_branchless, K, A_cost, B_cost, min_cost, A_prime, B_prime, min_prime);
         C_cost[x * N + y] = min_cost;
         C_prime[x * N + y] = min_prime;
     }
