@@ -19,7 +19,7 @@ void host_minplus(int M, int N, int K, const float *A_cost, const float *B_cost,
       float min_cost = A_cost[x * K] + B_cost[y];
       uint min_prime = A_prime[x * K] * B_prime[y];
       for (int i = 1; i < K; ++i) {
-        float i_cost = A_cost[x * K + i] + B_cost[y];
+        float i_cost = A_cost[x * K + i] + B_cost[i * N + y];
         if (i_cost < min_cost) {
           min_cost = i_cost;
           min_prime = A_prime[x * K + i] * B_prime[i * N + y];

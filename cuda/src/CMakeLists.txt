@@ -1,1 +1,1 @@
-target_sources(path_linalg PRIVATE naive_minplus.cu host_minplus.cc)
+target_sources(path_linalg PRIVATE naive_minplus.cu runner.cc host_minplus.cc naive_minplus_branch.cu)

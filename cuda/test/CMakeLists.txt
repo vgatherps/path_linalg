@@ -1,4 +1,4 @@
-add_executable(path_linalg_test test.cu)
+add_executable(path_linalg_test test.cc)
 
 set_property(TARGET path_linalg_test PROPERTY CUDA_ARCHITECTURES native)
 
